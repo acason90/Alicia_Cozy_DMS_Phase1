@@ -1,8 +1,8 @@
 import java.util.Scanner;
 
 /**
- * Entry point for Alicia's Cozy Oasis DMS.
- * Provides a Command Line Interface (CLI) for user interaction.
+ * Main application for Alicia's Cozy Oasis.
+ * Provides user input validation and record management.
  */
 public class Main {
     public static void main(String[] args) {
@@ -12,53 +12,54 @@ public class Main {
 
         while (running) {
             System.out.println("\n--- Alicia's Cozy Oasis DMS ---");
-            System.out.println("1. Load Batch (games.txt)\n2. Add Manual\n3. Display All\n4. Remove Game\n5. Average Rating\n6. Exit");
+            System.out.println("1. Batch Load (games.txt)\n2. Add Manual Record\n3. Display All Records\n4. Update Rating (by ID)\n5. Remove Game (by ID)\n6. Average Rating\n7. Exit");
             System.out.print("Choice: ");
             int choice = getIntInput(input);
 
             switch (choice) {
                 case 1:
-                    System.out.print("Filename: ");
+                    System.out.print("Enter Filename: ");
                     System.out.println("Added: " + manager.loadGamesFromFile(input.nextLine()));
                     break;
                 case 2:
-                    // Manual entry with input loop validation for each field
+                    System.out.print("Enter Unique ID: "); int id = getIntInput(input);
                     System.out.print("Title: "); String t = input.nextLine();
                     String g = getStringWithLetters(input, "Genre");
                     System.out.print("Developer: "); String d = input.nextLine();
                     String p = getStringWithLetters(input, "Platform");
                     System.out.print("Year (1958-2026): "); int y = getValidYear(input);
                     System.out.print("Rating (1-10): "); int r = getValidRating(input);
-                    manager.addGame(new Game(t, g, d, p, y, r));
+                    manager.addGame(new Game(id, t, g, d, p, y, r));
                     break;
                 case 3:
-                    // Display all objects currently in the manager's list
+                    if (manager.getAllGames().isEmpty()) System.out.println("Oasis is empty.");
                     for (Game game : manager.getAllGames()) System.out.println(game.getDetails());
                     break;
                 case 4:
-                    System.out.print("Title to remove: ");
-                    System.out.println(manager.removeGameByTitle(input.nextLine()) ? "Removed" : "Not Found");
+                    System.out.print("Enter ID to update: "); int upId = getIntInput(input);
+                    System.out.print("New Rating: "); int upRate = getValidRating(input);
+                    System.out.println(manager.updateComfyRatingByID(upId, upRate) ? "Updated" : "ID not found");
                     break;
                 case 5:
-                    // Mathematical Custom Action output
-                    System.out.printf("Avg Comfy Rating: %.2f/10%n", manager.calculateAverageComfyRating());
+                    System.out.print("Enter ID to remove: "); int remId = getIntInput(input);
+                    System.out.println(manager.removeGameByID(remId) ? "Removed" : "ID not found");
                     break;
                 case 6:
-                    running = false; // Breaks the while loop
+                    System.out.printf("Avg Comfy Rating: %.2f/10%n", manager.calculateAverageComfyRating());
+                    break;
+                case 7:
+                    running = false;
                     break;
             }
         }
     }
 
-    // --- INPUT VALIDATION HELPERS ---
-
-    // Forces user to enter an integer, prevents crash if they enter text
+    // Input Validation Helper Methods
     public static int getIntInput(Scanner s) {
         while (!s.hasNextInt()) { s.next(); System.out.print("Enter a number: "); }
         int val = s.nextInt(); s.nextLine(); return val;
     }
 
-    // Validates that the string is not just numbers
     public static String getStringWithLetters(Scanner s, String field) {
         while (true) {
             System.out.print(field + ": ");
@@ -68,7 +69,6 @@ public class Main {
         }
     }
 
-    // Ensures the year stays within the specified range
     public static int getValidYear(Scanner s) {
         while (true) {
             int y = getIntInput(s);
@@ -77,7 +77,6 @@ public class Main {
         }
     }
 
-    // Ensures the rating is between 1 and 10
     public static int getValidRating(Scanner s) {
         while (true) {
             int r = getIntInput(s);
