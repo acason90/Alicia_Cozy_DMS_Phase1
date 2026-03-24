@@ -1,8 +1,10 @@
 /**
- * Represents a single "Cozy Game" object.
- * Synchronized to prevent IllegalFormatConversionException.
+ * Data Model for a Cozy Game.
+ * Includes a Unique Identifier (Primary Key) to distinguish between
+ * games with the same title on different platforms.
  */
 public class Game {
+    private int gameID; // Primary Key
     private String title;
     private String genre;
     private String developer;
@@ -10,8 +12,9 @@ public class Game {
     private int releaseYear;
     private int comfyRating;
 
-    // Constructor - The order here MUST match how you call it in GameManager/Main
-    public Game(String title, String genre, String developer, String platform, int releaseYear, int comfyRating) {
+    // Constructor: All 7 fields must be provided
+    public Game(int gameID, String title, String genre, String developer, String platform, int releaseYear, int comfyRating) {
+        this.gameID = gameID;
         this.title = title;
         this.genre = genre;
         this.developer = developer;
@@ -21,11 +24,11 @@ public class Game {
     }
 
     // Getters
+    public int getGameID() { return gameID; }
     public String getTitle() { return title; }
-    public String getGenre() { return genre; }
     public int getComfyRating() { return comfyRating; }
 
-    // Validation Setters
+    // Logic Validation: Rating must be 1-10
     public boolean setComfyRating(int rating) {
         if (rating >= 1 && rating <= 10) {
             this.comfyRating = rating;
@@ -34,6 +37,7 @@ public class Game {
         return false;
     }
 
+    // Logic Validation: Year must be reasonable
     public boolean setYear(int year) {
         if (year >= 1958 && year <= 2026) {
             this.releaseYear = year;
@@ -43,12 +47,11 @@ public class Game {
     }
 
     /**
-     * FORMAT CHECK:
-     * %s = String, %d = Decimal Integer
-     * Order: Title (s), Genre (s), Dev (s), Platform (s), Year (d), Rating (d)
+     * Returns a formatted record.
+     * Note: ID is placed first to emphasize its role as the Primary Key.
      */
     public String getDetails() {
-        return String.format("Title: %-20s | Genre: %-12s | Dev: %-15s | Platform: %-10s | Year: %d | Comfy: %d/10",
-                title, genre, developer, platform, releaseYear, comfyRating);
+        return String.format("ID: %-5d | Title: %-20s | Platform: %-10s | Year: %d | Comfy: %d/10",
+                gameID, title, platform, releaseYear, comfyRating);
     }
 }

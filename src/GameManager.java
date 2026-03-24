@@ -4,17 +4,17 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Manages the collection of Game objects.
- * Handles CRUD operations, file I/O, and mathematical calculations.
+ * Controller class that manages the list of Games.
+ * Uses GameID for precise record targeting.
  */
 public class GameManager {
     private List<Game> gameList;
 
     public GameManager() {
-        this.gameList = new ArrayList<>(); // Initializes the storage list
+        this.gameList = new ArrayList<>();
     }
 
-    // Adds a Game object to the list and returns current count (Verification)
+    // CREATE: Adds game and returns new list size
     public int addGame(Game newGame) {
         if (newGame != null) gameList.add(newGame);
         return gameList.size();
@@ -22,15 +22,27 @@ public class GameManager {
 
     public List<Game> getAllGames() { return gameList; }
 
-    // Deletes a game by searching for a matching title (Case-Insensitive)
-    public boolean removeGameByTitle(String title) {
-        return gameList.removeIf(g -> g.getTitle().equalsIgnoreCase(title));
+    /**
+     * DELETE: Targets a specific record by its unique ID.
+     * Prevents accidental deletion of duplicates (e.g., same game on different platforms).
+     */
+    public boolean removeGameByID(int id) {
+        return gameList.removeIf(g -> g.getGameID() == id);
     }
 
     /**
-     * Custom Action: Calculates the arithmetic mean of all comfy ratings.
-     * Prevents division by zero if the list is empty.
+     * UPDATE: Targets a specific record by its ID to update the rating.
      */
+    public boolean updateComfyRatingByID(int id, int newRating) {
+        for (Game game : gameList) {
+            if (game.getGameID() == id) {
+                return game.setComfyRating(newRating);
+            }
+        }
+        return false;
+    }
+
+    // CUSTOM ACTION: Average of all ratings
     public double calculateAverageComfyRating() {
         if (gameList.isEmpty()) return 0.0;
         double total = 0;
@@ -39,8 +51,8 @@ public class GameManager {
     }
 
     /**
-     * Reads a CSV file and converts each line into a Game object.
-     * Implements strict data validation to filter out "junk" data.
+     * BATCH LOAD: Parses 7 fields per line.
+     * Format: ID, Title, Genre, Developer, Platform, Year, Rating
      */
     public int loadGamesFromFile(String filePath) {
         int count = 0;
@@ -49,32 +61,28 @@ public class GameManager {
             Scanner fs = new Scanner(file);
             while (fs.hasNextLine()) {
                 String line = fs.nextLine();
-                if (line.trim().isEmpty()) continue; // Skip blank lines
-
+                if (line.trim().isEmpty()) continue;
                 String[] d = line.split(",");
-                if (d.length == 6) { // Ensure all 6 fields exist
+                if (d.length == 7) { // Now expecting 7 fields
                     try {
-                        String title = d[0].trim();
-                        String genre = d[1].trim();
-                        String dev = d[2].trim();
-                        String plat = d[3].trim();
-                        int year = Integer.parseInt(d[4].trim());
-                        int rate = Integer.parseInt(d[5].trim());
+                        int id = Integer.parseInt(d[0].trim());
+                        String title = d[1].trim();
+                        String genre = d[2].trim();
+                        String dev = d[3].trim();
+                        String plat = d[4].trim();
+                        int year = Integer.parseInt(d[5].trim());
+                        int rate = Integer.parseInt(d[6].trim());
 
-                        // Data integrity check: Letters required in text, valid year/rating ranges
+                        // Data Integrity Validation
                         if (genre.matches(".*[a-zA-Z].*") && year >= 1958 && year <= 2026 && rate >= 1 && rate <= 10) {
-                            addGame(new Game(title, genre, dev, plat, year, rate));
+                            addGame(new Game(id, title, genre, dev, plat, year, rate));
                             count++;
                         }
-                    } catch (Exception e) {
-                        // Catches parsing errors for a specific row so the whole process doesn't stop
-                    }
+                    } catch (Exception e) { /* Skip invalid rows */ }
                 }
             }
             fs.close();
-        } catch (Exception e) {
-            System.out.println("File Error: " + e.getMessage());
-        }
-        return count; // Returns number of successfully loaded games
+        } catch (Exception e) { System.out.println("File error: " + e.getMessage()); }
+        return count;
     }
 }
