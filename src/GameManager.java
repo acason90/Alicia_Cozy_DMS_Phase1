@@ -1,88 +1,89 @@
-import java.io.File;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
- * Controller class that manages the list of Games.
- * Uses GameID for precise record targeting.
+ * Controller for Database Operations.
+ * Handles CRUD and Custom Actions using JDBC.
  */
 public class GameManager {
-    private List<Game> gameList;
+    // Relative path
+    private final String url = "jdbc:sqlite:cozy_oasis.db";
 
-    public GameManager() {
-        this.gameList = new ArrayList<>();
+    public List<Game> getAllGames() {
+        List<Game> games = new ArrayList<>();
+        String sql = "SELECT * FROM games";
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                games.add(new Game(
+                        rs.getInt("gameID"),
+                        rs.getString("title"),
+                        rs.getString("genre"),
+                        rs.getString("developer"),
+                        rs.getString("platform"),
+                        rs.getInt("releaseYear"),
+                        rs.getDouble("hoursPlayed"),
+                        rs.getInt("comfyRating")
+                ));
+            }
+        } catch (SQLException e) { System.out.println("Read Error: " + e.getMessage()); }
+        return games;
     }
 
-    // CREATE: Adds game and returns new list size
-    public int addGame(Game newGame) {
-        if (newGame != null) gameList.add(newGame);
-        return gameList.size();
+    public boolean addGame(Game g) {
+        String sql = "INSERT INTO games VALUES(?,?,?,?,?,?,?,?)";
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, g.getGameID());
+            pstmt.setString(2, g.getTitle());
+            pstmt.setString(3, g.getGenre());
+            pstmt.setString(4, g.getDeveloper());
+            pstmt.setString(5, g.getPlatform());
+            pstmt.setInt(6, g.getReleaseYear());
+            pstmt.setDouble(7, g.getHoursPlayed());
+            pstmt.setInt(8, g.getComfyRating());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) { return false; }
     }
 
-    public List<Game> getAllGames() { return gameList; }
-
-    /**
-     * DELETE: Targets a specific record by its unique ID.
-     * Prevents accidental deletion of duplicates (e.g., same game on different platforms).
-     */
     public boolean removeGameByID(int id) {
-        return gameList.removeIf(g -> g.getGameID() == id);
+        String sql = "DELETE FROM games WHERE gameID = ?";
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) { return false; }
     }
 
+    public double calculateAverageRating() {
+        String sql = "SELECT AVG(comfyRating) FROM games";
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) return rs.getDouble(1);
+        } catch (SQLException e) { System.out.println(e.getMessage()); }
+        return 0.0;
+    }
     /**
-     * UPDATE: Targets a specific record by its ID to update the rating.
+     * UPDATE: Modifies the rating of a specific game in the database.
      */
-    public boolean updateComfyRatingByID(int id, int newRating) {
-        for (Game game : gameList) {
-            if (game.getGameID() == id) {
-                return game.setComfyRating(newRating);
-            }
+    public boolean updateRatingByID(int id, int newRating) {
+        String sql = "UPDATE games SET comfyRating = ? WHERE gameID = ?";
+        try (Connection conn = DriverManager.getConnection(url);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, newRating);
+            pstmt.setInt(2, id);
+
+            // Returns true if 1 or more rows were changed
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Update Error: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
-    // CUSTOM ACTION: Average of all ratings
-    public double calculateAverageComfyRating() {
-        if (gameList.isEmpty()) return 0.0;
-        double total = 0;
-        for (Game g : gameList) total += g.getComfyRating();
-        return total / gameList.size();
-    }
 
-    /**
-     * BATCH LOAD: Parses 7 fields per line.
-     * Format: ID, Title, Genre, Developer, Platform, Year, Rating
-     */
-    public int loadGamesFromFile(String filePath) {
-        int count = 0;
-        try {
-            File file = new File(filePath);
-            Scanner fs = new Scanner(file);
-            while (fs.hasNextLine()) {
-                String line = fs.nextLine();
-                if (line.trim().isEmpty()) continue;
-                String[] d = line.split(",");
-                if (d.length == 7) { // Now expecting 7 fields
-                    try {
-                        int id = Integer.parseInt(d[0].trim());
-                        String title = d[1].trim();
-                        String genre = d[2].trim();
-                        String dev = d[3].trim();
-                        String plat = d[4].trim();
-                        int year = Integer.parseInt(d[5].trim());
-                        int rate = Integer.parseInt(d[6].trim());
-
-                        // Data Integrity Validation
-                        if (genre.matches(".*[a-zA-Z].*") && year >= 1958 && year <= 2026 && rate >= 1 && rate <= 10) {
-                            addGame(new Game(id, title, genre, dev, plat, year, rate));
-                            count++;
-                        }
-                    } catch (Exception e) { /* Skip invalid rows */ }
-                }
-            }
-            fs.close();
-        } catch (Exception e) { System.out.println("File error: " + e.getMessage()); }
-        return count;
-    }
 }

@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -18,16 +20,15 @@ public class GameManagerTest {
 
     @Test
     void testAddObject() {
-        // Create a dummy object
-        Game testGame = new Game(999, "Test Game", "Test Gen", "Test Dev", "PC", 2024,5);
-
-        // Assert that the list size is 1 after adding
-        assertEquals(1, manager.addGame(testGame), "Database should contain 1 object after addition.");
+        GameManager manager = new GameManager();
+        // Added 0.0 for hoursPlayed to match the new constructor
+        Game testGame = new Game(999, "Test", "Genre", "Dev", "PC", 2024, 0.0, 10);
+        assertTrue(manager.addGame(testGame));
     }
 
     @Test
     void testRemoveObject() {
-        Game testGame = new Game(999, "Test Game", "Test Gen", "Test Dev", "PC", 2024,5);
+        Game testGame =new Game(999, "Test", "Genre", "Dev", "PC", 2024, 0.0, 10);
         manager.addGame(testGame);
 
         // Assert that removing by the correct ID returns true
@@ -37,28 +38,48 @@ public class GameManagerTest {
 
     @Test
     void testUpdateObject() {
-        Game testGame = new Game(999, "Test Game", "Test Gen", "Test Dev", "PC", 2024,5);
+        // 1. Setup: Use a unique ID to avoid conflicts with existing database records
+        int testID = 999;
+        Game testGame = new Game(testID, "Test Update", "Genre", "Dev", "PC", 2024, 0.0, 5);
         manager.addGame(testGame);
 
-        // Assert that updating the rating to 10 returns true
-        assertTrue(manager.updateComfyRatingByID(999, 10), "Update should return true for valid ID.");
-        assertEquals(10, manager.getAllGames().get(0).getComfyRating(), "Rating should be updated to 10.");
+        // 2. Execute: Use the renamed database method 'updateRatingByID'
+        // This returns true if the SQL 'UPDATE' command affected 1 or more rows.
+        assertTrue(manager.updateRatingByID(testID, 10), "Update should return true for valid ID.");
+
+        // 3. Verify: Pull the list fresh from the database to see the change
+        List<Game> games = manager.getAllGames();
+
+        // Find our specific game in the list to verify the rating changed
+        int updatedRating = 0;
+        for (Game g : games) {
+            if (g.getGameID() == testID) {
+                updatedRating = g.getComfyRating();
+                break;
+            }
+        }
+
+        assertEquals(10, updatedRating, "Rating should be updated to 10 in the database.");
     }
 
     @Test
     void testCustomAction() {
-        // Add two games with specific ratings
-        manager.addGame(new Game(1, "Game A", "Test Gen", "Test Dev", "PC", 2024,10));
-        manager.addGame(new Game(2, "Game B", "Test Gen", "Test Dev", "PC", 2024,6));
+        // Clear old data if necessary or just add unique test IDs
+        // Added 0.0 for the hoursPlayed parameter
+        manager.addGame(new Game(901, "Game A", "Test Gen", "Test Dev", "PC", 2024, 0.0, 10));
+        manager.addGame(new Game(902, "Game B", "Test Gen", "Test Dev", "PC", 2024, 0.0, 6));
 
-        // Custom Action: Average should be (10 + 6) / 2 = 8.0
-        assertEquals(8.0, manager.calculateAverageComfyRating(), "Average rating calculation is incorrect.");
+        // Updated method name to match the new GameManager
+        assertEquals(8.0, manager.calculateAverageRating(), 0.01, "Average rating calculation is incorrect.");
     }
 
     @Test
-    void testOpenFile() {
-        // Test that loading a non-existent file returns 0 (handling the error gracefully)
-        int result = manager.loadGamesFromFile("non_existent_file.txt");
-        assertEquals(0, result, "Should return 0 when a file cannot be opened.");
+    void testDatabaseRead() {
+        // Ensure the manager can pull the list from the DB
+        List<Game> games = manager.getAllGames();
+
+        // As long as you ran your SQL script, this should not be null
+        assertNotNull(games, "The game list should be successfully retrieved from the database.");
     }
+
 }
