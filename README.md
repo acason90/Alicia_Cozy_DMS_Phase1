@@ -1,27 +1,32 @@
-### Alicia's Cozy Oasis - DMS Phase 1
-Welcome to the Cozy Oasis, a Database Management System specifically designed to track and rate "Cozy Games." This project was built for Software Development 1 to demonstrate Core OOP principles, CRUD functionality, and robust data validation.
+# 🍵 Cozy Oasis Management System (Phase 4)
+**Developer:** Alicia  
+**Course:** Software Development 1 (CEN 3024C)
 
-#### Key Features
-6-Point Data Model: Each game tracks Title, Genre, Developer, Platform, Release Year, and a "Comfy Rating."
+## 🌸 Overview
+Cozy Oasis is a Java-based Desktop Management System (DMS) designed to help users track their "cozy" gaming library. This version (Phase 4) transitions the project from local text file storage to a persistent **SQLite Relational Database**.
 
-Batch Import: Load 20+ game samples instantly from a .txt file.
+## 🛠️ Key Features
+- **Persistent Storage:** All game data is stored in `cozy_oasis.db`.
+- **Full CRUD Operations:** Add, Read, Update, and Delete games directly through the GUI.
+- **Custom SQL Analytics:** Automatically calculates average "Comfy Ratings" using SQL aggregate functions.
+- **Cozy Aesthetics:** A custom Swing UI featuring a Matcha and Strawberry color palette.
 
-Data Integrity: Implements Regex validation to ensure text fields contain letters and years fall within a reasonable range (1958–2026).
+## 🚀 Setup & Installation
+To run this project on your local machine, follow these steps:
 
-Custom Action: Automatically calculates the Average Comfy Rating of the entire collection.
+1. **Clone the Repository:**
+   `git clone [Your GitHub Link Here]`
+2. **Add the SQLite Driver:**
+   Ensure the `sqlite-jdbc-3.45.1.0.jar` is added to your project libraries in IntelliJ (File > Project Structure > Libraries).
+3. **Initialize the Database:**
+   Run the `database_setup.sql` script within IntelliJ to create the `games` table and populate the 20 sample records.
+4. **Launch the GUI:**
+   Run `CozyGamesGUI.java`. The data will auto-populate upon startup.
 
-#### How to Run
-Open the project in IntelliJ.
-
-Ensure the games.txt file is in the root directory.
-
-Run the Main.java file.
-
-Use the menu to interact with the Oasis!
-
-#### Project Structure
-Game.java: The Object class (Data Model).
-
-GameManager.java: The Logic class (Controller).
-
-Main.java: The Application class (User Interface).
+## 📊 Database Schema
+The database contains 8 columns to maintain high data integrity:
+- `gameID` (Primary Key)
+- `title`, `genre`, `developer`, `platform`
+- `releaseYear`
+- `hoursPlayed`
+- `comfyRating`
