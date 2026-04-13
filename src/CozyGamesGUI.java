@@ -4,9 +4,10 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Class: CozyGamesGUI
- * Description: Phase 4 Database Integrated Version.
- * Now manages data via SQLite instead of text files.
+ * Main User Interface for the Cozy Oasis Management System.
+ * Provides a Matcha and Strawberry themed dashboard for interacting
+ * with the game database.
+ * manages data via SQLite.
  */
 public class CozyGamesGUI extends JFrame {
     private JTable gameTable;
@@ -20,6 +21,10 @@ public class CozyGamesGUI extends JFrame {
     private final Color TEXT_BROWN = new Color(80, 70, 60);
     private final Font COZY_FONT = new Font("Segoe UI", Font.BOLD, 13);
 
+    /**
+     * Initializes the GUI components, sets the theme, and auto-loads
+     * data from the database.
+     */
     public CozyGamesGUI() {
         manager = new GameManager(); // Initialize the controller
 
@@ -99,6 +104,9 @@ public class CozyGamesGUI extends JFrame {
         refreshFromDatabase();
     }
 
+    /**
+     * Fetches fresh data from the GameManager and refreshes the JTable display.
+     */
     private void refreshFromDatabase() {
         tableModel.setRowCount(0);
         List<Game> games = manager.getAllGames();
@@ -110,6 +118,9 @@ public class CozyGamesGUI extends JFrame {
         }
     }
 
+    /**
+     * Displays a form to gather input and add a new game to the system.
+     */
     private void showAddForm() {
         JPanel panel = new JPanel(new GridLayout(8, 2, 5, 5));
         JTextField[] f = new JTextField[8];
@@ -166,6 +177,13 @@ public class CozyGamesGUI extends JFrame {
         return btn;
     }
 
+    /**
+     * The main entry point for the application.
+     * This method launches the Cozy Games Management System by
+     * initializing the GUI on the Event Dispatch Thread (EDT) to
+     * ensure thread safety and a smooth user experience.
+     * * @param args command-line arguments (not utilized in this application)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CozyGamesGUI().setVisible(true));
     }

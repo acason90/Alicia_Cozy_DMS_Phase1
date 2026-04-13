@@ -2,7 +2,7 @@
   <artifact type="jar" name="Alicia_Cozy_DMS_Phase2:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Alicia_Cozy_DMS_Phase2_jar</output-path>
     <root id="archive" name="Alicia_Cozy_DMS_Phase2.jar">
-      <element id="module-output" name="Alicia_Cozy_DMS_Phase3" />
+      <element id="module-output" name="Alicia_Cozy_DMS_Phase4" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter/5.14.0/junit-jupiter-5.14.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/junit/jupiter/junit-jupiter-api/5.14.0/junit-jupiter-api-5.14.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" path-in-jar="/" />

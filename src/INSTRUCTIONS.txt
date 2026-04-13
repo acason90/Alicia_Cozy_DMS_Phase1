@@ -1,0 +1,9 @@
+How to Run Alicia's Cozy Oasis:
+
+Open the project in IntelliJ IDEA.
+
+Ensure the sqlite-jdbc library is attached (included in the lib folder/project settings).
+
+Right-click database_setup.sql and run it against the cozy_oasis.db connection to populate the data.
+
+Run CozyGamesGUI.java to start the application.

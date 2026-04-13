@@ -2,7 +2,7 @@
   <artifact type="jar" name="Alicia_Cozy_DMS_Phase1:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Alicia_Cozy_DMS_Phase1_jar</output-path>
     <root id="archive" name="Alicia_Cozy_DMS_Phase1.jar">
-      <element id="module-output" name="Alicia_Cozy_DMS_Phase3" />
+      <element id="module-output" name="Alicia_Cozy_DMS_Phase4" />
     </root>
   </artifact>
 </component>
