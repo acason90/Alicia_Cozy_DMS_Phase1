@@ -70,9 +70,8 @@ public class GameManagerTest {
         manager.addGame(new Game(902, "Game B", "Test Gen", "Test Dev", "PC", 2024, 0.0, 6));
 
         // Updated method name to match the new GameManager
-        assertEquals(8.0, manager.calculateAverageRating(), 0.01, "Average rating calculation is incorrect.");
+        assertEquals(8.0, manager.calculateAverageRating(1), 0.01, "Average rating calculation is incorrect.");
     }
-
     @Test
     void testDatabaseRead() {
         // Ensure the manager can pull the list from the DB

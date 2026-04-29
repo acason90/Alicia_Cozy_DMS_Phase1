@@ -22,7 +22,7 @@ public class CozyGamesGUI extends JFrame {
     private final Font COZY_FONT = new Font("Segoe UI", Font.BOLD, 13);
 
     /**
-     * Initializes the GUI components, sets the theme, and auto-loads
+     * Initializes the GUI components, sets the theme, and autoloads
      * data from the database.
      */
     public CozyGamesGUI() {
@@ -93,9 +93,16 @@ public class CozyGamesGUI extends JFrame {
             }
         });
 
+        // passes the ID of the selected row to the calculation method
         btnAvg.addActionListener(e -> {
-            double avg = manager.calculateAverageRating();
-            JOptionPane.showMessageDialog(this, "The Average Cozy Rating is: " + String.format("%.2f", avg));
+            int row = gameTable.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Select a game first to calculate its impact score!");
+                return;
+            }
+            int id = (int) tableModel.getValueAt(row, 0);
+            double score = manager.calculateAverageRating(id);
+            JOptionPane.showMessageDialog(this, "The Cozy Impact Score for this game is: " + String.format("%.2f", score));
         });
 
         btnExit.addActionListener(e -> System.exit(0));
@@ -134,10 +141,17 @@ public class CozyGamesGUI extends JFrame {
 
         if (JOptionPane.showConfirmDialog(this, panel, "Add Cozy Game", JOptionPane.OK_CANCEL_OPTION) == 0) {
             try {
+                // FIXED: Validation added for the 1-10 range during manual entry
+                int rating = Integer.parseInt(f[7].getText());
+                if (rating < 1 || rating > 10) {
+                    JOptionPane.showMessageDialog(this, "Rating must be between 1 and 10!");
+                    return;
+                }
+
                 Game newGame = new Game(
                         Integer.parseInt(f[0].getText()), f[1].getText(), f[2].getText(),
                         f[3].getText(), f[4].getText(), Integer.parseInt(f[5].getText()),
-                        Double.parseDouble(f[6].getText()), Integer.parseInt(f[7].getText())
+                        Double.parseDouble(f[6].getText()), rating
                 );
                 manager.addGame(newGame);
                 refreshFromDatabase();
@@ -145,6 +159,10 @@ public class CozyGamesGUI extends JFrame {
         }
     }
 
+    /**
+     * Orchestrates the update process for a selected game's rating.
+     * Includes range validation to prevent invalid entries.
+     */
     private void handleUpdate() {
         int row = gameTable.getSelectedRow();
         if (row == -1) {
@@ -156,6 +174,13 @@ public class CozyGamesGUI extends JFrame {
         if (input != null) {
             try {
                 int newRate = Integer.parseInt(input);
+
+                // range check to prevent invalid numbers
+                if (newRate < 1 || newRate > 10) {
+                    JOptionPane.showMessageDialog(this, "Please enter a rating between 1 and 10.");
+                    return;
+                }
+
                 if (manager.updateRatingByID(id, newRate)) refreshFromDatabase();
             } catch (Exception ex) { JOptionPane.showMessageDialog(this, "Please enter a valid number."); }
         }
@@ -182,7 +207,7 @@ public class CozyGamesGUI extends JFrame {
      * This method launches the Cozy Games Management System by
      * initializing the GUI on the Event Dispatch Thread (EDT) to
      * ensure thread safety and a smooth user experience.
-     * * @param args command-line arguments (not utilized in this application)
+     *
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CozyGamesGUI().setVisible(true));

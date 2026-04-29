@@ -13,6 +13,7 @@ public class GameManager {
 
     /**
      * Retrieves all game records from the SQLite database.
+     *
      * @return a List of Game objects populated from the database
      */
     public List<Game> getAllGames() {
@@ -33,15 +34,25 @@ public class GameManager {
                         rs.getInt("comfyRating")
                 ));
             }
-        } catch (SQLException e) { System.out.println("Read Error: " + e.getMessage()); }
+        } catch (SQLException e) {
+            System.out.println("Read Error: " + e.getMessage());
+        }
         return games;
     }
+
     /**
      * Inserts a new game record into the database.
+     *
      * @param g the Game object to be added
      * @return true if insertion was successful, false otherwise
      */
     public boolean addGame(Game g) {
+        // FIX: Validation check before SQL execution
+        if (g.getComfyRating() < 1 || g.getComfyRating() > 10) {
+            System.out.println("Validation Error: Rating must be 1-10.");
+            return false;
+        }
+
         String sql = "INSERT INTO games VALUES(?,?,?,?,?,?,?,?)";
         try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -54,13 +65,16 @@ public class GameManager {
             pstmt.setDouble(7, g.getHoursPlayed());
             pstmt.setInt(8, g.getComfyRating());
             return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) { return false; }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**
      * Removes a specific game record from the database using its unique ID.
      * This method executes a SQL DELETE command.
      * * @param id the unique integer identifier of the game to be deleted
+     *
      * @return true if a record was successfully found and removed;
      * false if the ID was not found or a database error occurred
      */
@@ -70,45 +84,52 @@ public class GameManager {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) { return false; }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**
      * Custom Action: Calculates the average cozy rating across all games.
+     *
      * @return the average rating as a double
      */
-    public double calculateAverageRating() {
-        String sql = "SELECT AVG(comfyRating) FROM games";
+    public double calculateAverageRating(int id) {
+        String sql = "SELECT (hoursPlayed * comfyRating) / 2.0 FROM games WHERE gameID = ?";
         try (Connection conn = DriverManager.getConnection(url);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
             if (rs.next()) return rs.getDouble(1);
-        } catch (SQLException e) { System.out.println(e.getMessage()); }
+        } catch (SQLException e) {
+            System.out.println("Calculation Error: " + e.getMessage());
+        }
         return 0.0;
     }
 
     /**
      * UPDATE: Modifies the rating of a specific game in the database.
      * Updates the comfy rating for an existing game.
-     * @param id the ID of the game to update
+     *
+     * @param id        the ID of the game to update
      * @param newRating the new rating value (1-10)
      * @return true if the update was successful
      */
     public boolean updateRatingByID(int id, int newRating) {
+        // Validation check to block "11" or other invalid numbers
+        if (newRating < 1 || newRating > 10) {
+            return false;
+        }
+
         String sql = "UPDATE games SET comfyRating = ? WHERE gameID = ?";
         try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setInt(1, newRating);
             pstmt.setInt(2, id);
-
-            // Returns true if 1 or more rows were changed
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("Update Error: " + e.getMessage());
             return false;
         }
+
     }
-
-
 }

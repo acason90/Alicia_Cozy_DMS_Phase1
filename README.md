@@ -1,10 +1,9 @@
-# 🍵 Cozy Oasis Management System (Phase 4)
+# 🍵 Cozy Oasis Management System 
 **Developer:** Alicia  
 **Course:** Software Development 1 (CEN 3024C)
 
 ## 🌸 Overview
-Cozy Oasis is a Java-based Desktop Management System (DMS) designed to help users track their "cozy" gaming library. This version (Phase 4) transitions the project from local text file storage to a persistent **SQLite Relational Database**.
-
+Cozy Oasis is a Java-based Desktop Management System (DMS) designed to help users track their "cozy" gaming library.
 ## 🛠️ Key Features
 - **Persistent Storage:** All game data is stored in `cozy_oasis.db`.
 - **Full CRUD Operations:** Add, Read, Update, and Delete games directly through the GUI.
